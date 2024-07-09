@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rust-on-k8s
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rust-on-k8s
+  template:
+    metadata:
+      labels:
+        app: rust-on-k8s
+    spec:
+      containers:
+      - image: docker.io/library/ha-setup:latest
+        name: rust-on-k8s
+        imagePullPolicy: IfNotPresent
