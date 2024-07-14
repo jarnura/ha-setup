@@ -1,18 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rust-on-k8s
+  name: ha-setup
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: rust-on-k8s
+      app: ha-setup
   template:
     metadata:
       labels:
-        app: rust-on-k8s
+        app: ha-setup
     spec:
       containers:
-      - image: docker.io/library/ha-setup:latest
-        name: rust-on-k8s
-        imagePullPolicy: IfNotPresent
+      - image: MY_APP_IMAGE
+        name: ha-setup
+        env:
+        - name: PASSWORD
+          value: "<MY_CASSANDRA_PASSWORD>"
+        - name: USERNAME
+          value: "<MY_CASSANDRA_USERNAME>"
+        - name: DATABASE_URL
+          value: "<MY_CLUSTER_IP_FOR_CASSANDRA>"
+

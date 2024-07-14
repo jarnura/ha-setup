@@ -1,9 +1,15 @@
 use cassandra_cpp::*;
+use std::env;
 
 #[tokio::main]
+#[allow(clippy::result_large_err)]
 async fn main() -> Result<()> {
     let mut cluster = Cluster::default();
-    cluster.set_contact_points("127.0.0.1").unwrap();
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let username = env::var("USERNAME").expect("USERNAME must be set");
+    let password = env::var("PASSWORD").expect("PASSWORD must be set");
+    cluster.set_contact_points(&database_url).unwrap();
+    cluster.set_credentials(&username, &password).unwrap();
     cluster.set_load_balance_round_robin();
     let session = cluster.connect().await?;
 
