@@ -28,7 +28,7 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM chef AS cooking
 WORKDIR /app
 
-RUN cargo install --locked sccache
+RUN cargo install sccache
 
 ENV CARGO_INCREMENTAL=0
 ENV CARGO_NET_RETRY=2
