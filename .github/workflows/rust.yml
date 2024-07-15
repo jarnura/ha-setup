@@ -57,7 +57,7 @@ jobs:
       with:
         context: .
         build-args: |
-          SCCACHE_DIR=//sccache
-          RUSTC_WRAPPER=/usr/local/cargo/bin/sccache
+          SCCACHE_DIR=/sccache
+          RUSTC_WRAPPER=sccache
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
