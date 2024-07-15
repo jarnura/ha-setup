@@ -14,6 +14,7 @@ env:
   RUST_BACKTRACE: short
   CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
   RUSTC_WRAPPER: sccache
+  SCCACHE_DIR: /sccache
 
 jobs:
   build:
@@ -33,6 +34,14 @@ jobs:
         key: ${{ runner.os }}-buildx-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-buildx-
+    
+    - name: Cache sccache    
+      uses: actions/cache@v2
+      with:
+        path: /sccache
+        key: ${{ runner.os }}-sccache-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-sccache-
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -43,9 +52,10 @@ jobs:
         tool: sccache
         checksum: true
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache
+    - name: Build Docker image
+      # uses: docker/build-push-action@v4
+      run: docker build --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache -t ha-setup:latest . 
+      # with:
+        #context: .
+        #cache-from: type=local,src=/tmp/.buildx-cache
+        #ache-to: type=local,dest=/tmp/.buildx-cache
