@@ -45,9 +45,6 @@ ARG RUSTC_WRAPPER
 ENV SCCACHE_DIR=${SCCACHE_DIR}
 ENV RUSTC_WRAPPER=${RUSTC_WRAPPER}
 
-# Install sccache
-RUN cargo install sccache
-
 # Create cache directory and set permissions
 RUN mkdir -p ${SCCACHE_DIR} && chmod -R 777 ${SCCACHE_DIR}
 
