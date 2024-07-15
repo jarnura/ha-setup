@@ -28,7 +28,10 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM chef AS cooking
 WORKDIR /app
 
-RUN cargo install sccache
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=$SCCACHE_DIR,sharing=locked \ 
+    cargo install sccache --locked
 
 ENV CARGO_INCREMENTAL=0
 ENV CARGO_NET_RETRY=2
