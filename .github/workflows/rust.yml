@@ -56,9 +56,8 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: .
-        cache-from: |
-          type=local,src=/tmp/.buildx-cache
-          type=registry, src=/sccache
-        ache-to: |
-          type=local,dest=/tmp/.buildx-cache
-          type=registry, src=/sccache
+        build-args: |
+          SCCACHE_DIR=//sccache
+          RUSTC_WRAPPER=/usr/local/cargo/bin/sccache
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache
