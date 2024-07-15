@@ -28,17 +28,17 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM chef AS cooking
 WORKDIR /app
 
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/usr/local/cargo/git \
-    --mount=type=cache,target=$SCCACHE_DIR,sharing=locked \ 
-    cargo install sccache --locked
-
 ENV CARGO_INCREMENTAL=0
 ENV CARGO_NET_RETRY=2
 ENV RUSTUP_MAX_RETRIES=2
 ENV RUST_BACKTRACE="short"
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL="sparse"
 ENV RUSTC_WRAPPER=sccache SCCACHE_DIR=/sccache
+
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=$SCCACHE_DIR,sharing=locked \ 
+    cargo install sccache --locked
 
 COPY --from=base / /
 
