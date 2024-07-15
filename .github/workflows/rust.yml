@@ -34,14 +34,6 @@ jobs:
         key: ${{ runner.os }}-buildx-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-buildx-
-    
-    - name: Cache sccache    
-      uses: actions/cache@v2
-      with:
-        path: /sccache
-        key: ${{ runner.os }}-sccache-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-sccache-
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -51,6 +43,14 @@ jobs:
       with:
         tool: sccache
         checksum: true
+  
+    - name: Cache sccache    
+      uses: actions/cache@v2
+      with:
+        path: /sccache
+        key: ${{ runner.os }}-sccache-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-sccache-
 
     - name: Build Docker image
       uses: docker/build-push-action@v4
