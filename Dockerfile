@@ -1,16 +1,6 @@
 # Stage 1: Base image for common dependencies
 FROM ubuntu:latest AS base
 
-ARG RUSTC_WRAPPER
-
-ENV RUSTC_WRAPPER=${RUSTC_WRAPPER}
-
-# Copy the sccache binary from the host to the container
-COPY $RUSTC_WRAPPER /usr/local/bin/sccache
-
-# Make sure sccache is executable
-RUN chmod +x /usr/local/bin/sccache
-
 USER root
 
 RUN \
@@ -39,7 +29,7 @@ FROM chef AS cooking
 WORKDIR /app
 
 # only do in local docker build
-# RUN cargo install sccache
+RUN cargo install sccache
 
 ENV CARGO_INCREMENTAL=0
 ENV CARGO_NET_RETRY=2
@@ -47,15 +37,7 @@ ENV RUSTUP_MAX_RETRIES=2
 ENV RUST_BACKTRACE="short"
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL="sparse"
 
-# Set environment variables for sccache
-ENV RUSTC_WRAPPER=/usr/local/bin/sccache
-ENV SCCACHE_DIR=/cache/sccache
-
-# Create a directory for sccache cache
-RUN mkdir -p /cache/sccache
-
-# only do in local docker build
-# ENV RUSTC_WRAPPER=sccache SCCACHE_DIR=/sccache
+ENV RUSTC_WRAPPER=sccache SCCACHE_DIR=/sccache
 
 COPY --from=base / /
 
