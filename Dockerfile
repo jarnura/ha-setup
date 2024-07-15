@@ -1,6 +1,12 @@
 # Stage 1: Base image for common dependencies
 FROM ubuntu:latest AS base
 
+# Copy the sccache binary from the host to the container
+COPY /home/runner/.cargo/bin/sccache /usr/local/bin/sccache
+
+# Make sure sccache is executable
+RUN chmod +x /usr/local/bin/sccache
+
 USER root
 
 RUN \
@@ -36,12 +42,6 @@ ENV CARGO_NET_RETRY=2
 ENV RUSTUP_MAX_RETRIES=2
 ENV RUST_BACKTRACE="short"
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL="sparse"
-
-# Copy the sccache binary from the host to the container
-COPY /home/runner/.cargo/bin/sccache /usr/local/bin/sccache
-
-# Make sure sccache is executable
-RUN chmod +x /usr/local/bin/sccache
 
 # Set environment variables for sccache
 ENV RUSTC_WRAPPER=/usr/local/bin/sccache
