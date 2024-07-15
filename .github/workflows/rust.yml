@@ -8,6 +8,12 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_RETRY: 2
+  RUSTUP_MAX_RETRIES: 2
+  RUST_BACKTRACE: short
+  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+  RUSTC_WRAPPER: sccache
 
 jobs:
   build:
@@ -30,6 +36,12 @@ jobs:
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
+
+    - name: Set up Sccache
+      uses: taiki-e/install-action@v2.33.28
+      with:
+        tool: sccache
+        checksum: true
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
