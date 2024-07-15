@@ -63,7 +63,7 @@ jobs:
       with:
         context: .
         build-args: |
-          SCCACHE_DIR=${ env.SCCACHE_DIR }
-          RUSTC_WRAPPER=${ env.RUSTC_WRAPPER }
+          SCCACHE_DIR=${{ env.SCCACHE_DIR }}
+          RUSTC_WRAPPER=${{ env.RUSTC_WRAPPER }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
