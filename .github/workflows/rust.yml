@@ -37,15 +37,9 @@ jobs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
 
-    - name: Set up Sccache
-      uses: taiki-e/install-action@v2.33.28
-      with:
-        tool: sccache
-
     - name: Build Docker image
       uses: docker/build-push-action@v4
       with:
         context: .
-        build-args: RUSTC_WRAPPER=${{ github.workspace }}/.cargo/bin/sccache
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
