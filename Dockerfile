@@ -1,8 +1,12 @@
 # Stage 1: Base image for common dependencies
 FROM ubuntu:latest AS base
 
+ARG RUSTC_WRAPPER
+
+ENV RUSTC_WRAPPER=${RUSTC_WRAPPER}
+
 # Copy the sccache binary from the host to the container
-COPY /home/runner/.cargo/bin/sccache /usr/local/bin/sccache
+COPY $RUSTC_WRAPPER /usr/local/bin/sccache
 
 # Make sure sccache is executable
 RUN chmod +x /usr/local/bin/sccache
