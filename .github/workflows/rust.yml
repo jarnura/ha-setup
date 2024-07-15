@@ -13,8 +13,6 @@ env:
   RUSTUP_MAX_RETRIES: 2
   RUST_BACKTRACE: short
   CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
-  RUSTC_WRAPPER: "/home/runner/.cargo/bin/sccache"
-  SCCACHE_DIR: ~/cache/sccache
 
 jobs:
   build:
@@ -44,26 +42,26 @@ jobs:
     - uses: cargo-bins/cargo-binstall@main
     - run: cargo binstall -y sccache
 
-#    - name: Set up Sccache
- #     uses: taiki-e/install-action@v2.33.28
-  #    with:
-   #     tool: sccache
-    #    checksum: true
-  
-  #  - name: Cache sccache    
-   #   uses: actions/cache@v2
-    #  with:
-     #   path: /sccache
-      #  key: ${{ runner.os }}-sccache-${{ github.sha }}
-       # restore-keys: |
-        #  ${{ runner.os }}-sccache-
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+          toolchain: stable
+          override: true
+          target: x86_64-unknown-linux-musl
+
+    - name: Configure sccache env var and set build profile to ephemeral build
+      run: | 
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+          echo “SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo “RUSTFLAGS=’--cfg profile=ephemeral-build’” >> $GITHUB_ENV
+
+    - name: Run sccache-cache
+      uses: mozilla-actions/sccache-action@v0.0.2
 
     - name: Build Docker image
       uses: docker/build-push-action@v4
       with:
         context: .
-        build-args: |
-          SCCACHE_DIR=${{ env.SCCACHE_DIR }}
-          RUSTC_WRAPPER=${{ env.RUSTC_WRAPPER }}
+        build-args: RUSTC_WRAPPER=${{ env.RUSTC_WRAPPER }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
