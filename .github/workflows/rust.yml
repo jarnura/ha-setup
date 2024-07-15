@@ -53,9 +53,12 @@ jobs:
         checksum: true
 
     - name: Build Docker image
-      # uses: docker/build-push-action@v4
-      run: docker build --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache -t ha-setup:latest . 
-      # with:
-        #context: .
-        #cache-from: type=local,src=/tmp/.buildx-cache
-        #ache-to: type=local,dest=/tmp/.buildx-cache
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        cache-from: |
+          type=local,src=/tmp/.buildx-cache
+          type=registry, src=/sccache
+        ache-to: |
+          type=local,dest=/tmp/.buildx-cache
+          type=registry, src=/sccache
