@@ -13,8 +13,8 @@ env:
   RUSTUP_MAX_RETRIES: 2
   RUST_BACKTRACE: short
   CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
-  RUSTC_WRAPPER: sccache
-  SCCACHE_DIR: /sccache
+  RUSTC_WRAPPER: "/home/runner/.cargo/bin/sccache"
+  SCCACHE_DIR: ~/cache/sccache
 
 jobs:
   build:
@@ -30,7 +30,9 @@ jobs:
     - name: Cache Docker layers
       uses: actions/cache@v3
       with:
-        path: /tmp/.buildx-cache
+        path: |
+          /tmp/.buildx-cache
+           ~/.cache/sccache/
         key: ${{ runner.os }}-buildx-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-buildx-
@@ -38,22 +40,9 @@ jobs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
 
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
-    
-    - name: Install sccache
-      run: |
-        cargo install sccache
-        mkdir -p ${{ github.workspace }}/sccache-cache
-        echo "export SCCACHE_DIR=${{ github.workspace }}/sccache-cache" >> $GITHUB_ENV
-        echo "export RUSTC_WRAPPER=${{ github.workspace }}/.cargo/bin/sccache" >> $GITHUB_ENV
-
-    - name: Copy files into Docker build context
-      run: |
-        cp -r ${GITHUB_ENV.RUSTC_WRAPPER} ${GITHUB_WORKSPACE}/build-context
+    - uses: dtolnay/rust-toolchain@stable
+    - uses: cargo-bins/cargo-binstall@main
+    - run: cargo binstall -y sccache
 
 #    - name: Set up Sccache
  #     uses: taiki-e/install-action@v2.33.28
@@ -74,7 +63,7 @@ jobs:
       with:
         context: .
         build-args: |
-          SCCACHE_DIR=${GITHUB_ENV.SCCACHE_DIR}
-          RUSTC_WRAPPER=${GITHUB_ENV.RUSTC_WRAPPER}
+          SCCACHE_DIR=${ env.SCCACHE_DIR }
+          RUSTC_WRAPPER=${ env.RUSTC_WRAPPER }
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
