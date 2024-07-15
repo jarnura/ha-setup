@@ -37,16 +37,18 @@ ENV RUSTUP_MAX_RETRIES=2
 ENV RUST_BACKTRACE="short"
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL="sparse"
 
-# Accept build arguments
-ARG SCCACHE_DIR
-ARG RUSTC_WRAPPER
+# Copy the sccache binary from the host to the container
+COPY /home/runner/.cargo/bin/sccache /usr/local/bin/sccache
 
-# Set environment variables
-ENV SCCACHE_DIR=${SCCACHE_DIR}
-ENV RUSTC_WRAPPER=${RUSTC_WRAPPER}
+# Make sure sccache is executable
+RUN chmod +x /usr/local/bin/sccache
 
-# Create cache directory and set permissions
-RUN mkdir -p ${SCCACHE_DIR} && chmod -R 777 ${SCCACHE_DIR}
+# Set environment variables for sccache
+ENV RUSTC_WRAPPER=/usr/local/bin/sccache
+ENV SCCACHE_DIR=/cache/sccache
+
+# Create a directory for sccache cache
+RUN mkdir -p /cache/sccache
 
 # only do in local docker build
 # ENV RUSTC_WRAPPER=sccache SCCACHE_DIR=/sccache
