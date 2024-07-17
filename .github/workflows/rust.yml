@@ -51,7 +51,6 @@ jobs:
     - name: Create cargo directory and add files
       run: |
         mkdir -p ${{ env.CARGO_DIR }}
-        cat /hom/runner/.config/sccache/config
         cp /home/runner/.cargo/bin/sccache ${{ env.CARGO_DIR }}
 
     - name: Set up QEMU
