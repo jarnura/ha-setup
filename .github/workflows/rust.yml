@@ -60,7 +60,7 @@ jobs:
       run: |
         mkdir -p ${{ env.CARGO_DIR }}
         # cat ~/.config/sccache/config
-        cp /usr/local/bin/sccache ${{ env.CARGO_DIR }}
+        cp /home/runner/.cargo/bin/sccache ${{ env.CARGO_DIR }}
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
