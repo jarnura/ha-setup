@@ -20,46 +20,60 @@ RUN \
 FROM lukemathwalker/cargo-chef:latest-rust-1.78.0 AS chef
 WORKDIR /app
 
-FROM chef AS planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
+
 
 # # Stage 3: Builder image
 FROM chef AS cooking
 WORKDIR /app
 
+COPY . .
+
+ARG CARGO_DIR
+ARG ACTIONS_RUNTIME_TOKEN
+ARG ACTIONS_CACHE_URL
+
+ENV CARGO_DIR=${CARGO_DIR}
+
+COPY $CARGO_DIR /usr/local/cargo
+
+RUN ls -l
+
 # only do in local docker build
-RUN cargo install sccache
+# RUN cargo install sccache
 
 ENV CARGO_INCREMENTAL=0
 ENV CARGO_NET_RETRY=2
 ENV RUSTUP_MAX_RETRIES=2
 ENV RUST_BACKTRACE="short"
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL="sparse"
-
-ENV RUSTC_WRAPPER=sccache SCCACHE_DIR=/sccache
-
-# Copy only the Cargo.toml and Cargo.lock to leverage Docker layer caching
-COPY Cargo.toml Cargo.lock ./
+ENV SCCACHE_STATS=1
+ENV SCCACHE_LOG=debug
+ENV SCCACHE_GHA_ENABLED="on"
+ENV ACTIONS_CACHE_URL=${ACTIONS_CACHE_URL}
+ENV ACTIONS_RUNTIME_TOKEN=${ACTIONS_RUNTIME_TOKEN}
+ENV RUSTC_WRAPPER=/usr/local/cargo/sccache SCCACHE_DIR=~/.cache/sccache
+# ENV SCCACHE_CONF=config.toml
 
 COPY --from=base / /
 
-COPY . .
 
-COPY --from=planner /app/recipe.json recipe.json
+COPY --from=chef /app/recipe.json recipe.json
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \
     --mount=type=cache,target=$SCCACHE_DIR,sharing=locked \
 		cargo chef cook --recipe-path recipe.json
 
-COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \
     --mount=type=cache,target=$SCCACHE_DIR,sharing=locked \
 		cargo build
 
+RUN /usr/local/cargo/sccache --show-stats
+
 # Stage 4: Final image
-FROM base
+FROM base AS final
 
 ARG BIN_DIR=/local/bin
 ARG BINARY=ha-setup
